@@ -1,7 +1,34 @@
+# Python
 venv/
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+
+# Environment
 .env
+.env.*
+
+# Flask/runtime
 uploads/*
 *.log
 phishing.db
+
+# Training datasets
+dataset/
+*.csv
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Backup files
+*_backup.*
+*.bak
+
+# Keep trained models
+!model/
+!model/*.pkl
