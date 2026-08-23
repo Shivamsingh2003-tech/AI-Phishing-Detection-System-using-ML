@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Admin Login</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet">
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(135deg,#0f172a,#111827);
+    font-family:Segoe UI,Arial,sans-serif;
+    padding:20px;
+    color:#e5e7eb;
+}
+
+body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background:radial-gradient(circle,#38bdf822 1px,transparent 1px);
+    background-size:42px 42px;
+    z-index:-1;
+}
+
+.login-card{
+    width:470px;
+    max-width:100%;
+    background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.12);
+    backdrop-filter:blur(16px);
+    padding:42px;
+    border-radius:28px;
+    box-shadow:0 25px 60px rgba(0,0,0,0.35);
+    animation:slideUp 0.6s;
+}
+
+@keyframes slideUp{
+    from{
+        opacity:0;
+        transform:translateY(35px);
+    }
+
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+
+.logo{
+    width:90px;
+    height:90px;
+    margin:auto;
+    border-radius:25px;
+    background:linear-gradient(135deg,#2563eb,#7c3aed);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:48px;
+    box-shadow:0 18px 45px rgba(37,99,235,0.35);
+}
+
+.title{
+    text-align:center;
+    margin-top:18px;
+    margin-bottom:30px;
+}
+
+.title h2{
+    font-weight:800;
+    margin-bottom:5px;
+    color:#ffffff;
+}
+
+.title p{
+    color:#94a3b8;
+    margin-bottom:0;
+}
+
+.form-label{
+    font-weight:600;
+    color:#e5e7eb;
+}
+
+.form-control{
+    height:55px;
+    border-radius:0 12px 12px 0;
+    background:#020617 !important;
+    color:#e5e7eb !important;
+    border:1px solid #334155 !important;
+}
+
+.form-control::placeholder{
+    color:#94a3b8 !important;
+}
+
+.input-group-text{
+    border-radius:12px 0 0 12px;
+    background:#020617;
+    color:#38bdf8;
+    border:1px solid #334155;
+}
+
+.password-btn{
+    border-radius:0 12px 12px 0;
+    border:1px solid #334155;
+    color:#e5e7eb;
+    background:#020617;
+}
+
+.password-btn:hover{
+    background:#111827;
+    color:#38bdf8;
+}
+
+.btn-login{
+    width:100%;
+    padding:14px;
+    font-size:17px;
+    font-weight:800;
+    border-radius:14px;
+    border:none;
+    background:linear-gradient(135deg,#2563eb,#7c3aed);
+    transition:.3s;
+}
+
+.btn-login:hover{
+    transform:translateY(-3px);
+    box-shadow:0 12px 30px rgba(37,99,235,0.35);
+}
+
+.extra{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:14px;
+    margin-bottom:20px;
+    color:#94a3b8;
+}
+
+.extra label{
+    cursor:pointer;
+}
+
+.extra input{
+    margin-right:5px;
+    accent-color:#2563eb;
+}
+
+.extra a{
+    text-decoration:none;
+    color:#38bdf8;
+    font-weight:600;
+    transition:.2s;
+}
+
+.extra a:hover{
+    color:#7dd3fc;
+    text-decoration:underline;
+}
+
+.back-btn{
+    margin-top:12px;
+    width:100%;
+    border-radius:14px;
+    padding:12px;
+    font-weight:700;
+}
+
+.quick-title{
+    margin-top:20px;
+    margin-bottom:10px;
+    text-align:center;
+    color:#94a3b8;
+    font-size:14px;
+}
+
+.quick-links{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+}
+
+.quick-links a{
+    border-radius:14px;
+    padding:12px 8px;
+    font-weight:700;
+    font-size:14px;
+}
+
+.quick-links .full-link{
+    grid-column:1 / -1;
+}
+
+.security-note{
+    background:#020617;
+    border:1px solid #334155;
+    border-radius:15px;
+    padding:14px;
+    color:#94a3b8;
+    font-size:14px;
+    margin-top:18px;
+}
+
+.footer{
+    margin-top:25px;
+    text-align:center;
+    font-size:14px;
+    color:#94a3b8;
+}
+
+.alert{
+    border-radius:14px;
+}
+
+@media(max-width:576px){
+
+    .login-card{
+        padding:28px;
+    }
+
+    .quick-links{
+        grid-template-columns:1fr;
+    }
+
+    .quick-links .full-link{
+        grid-column:auto;
+    }
+
+    .extra{
+        flex-direction:column;
+        gap:10px;
+        align-items:flex-start;
+    }
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="login-card">
+
+    <!-- Logo -->
+    <div class="logo">
+        🛡
+    </div>
+
+    <!-- Title -->
+    <div class="title">
+        <h2>Admin Login</h2>
+        <p>AI Phishing Detection Site</p>
+    </div>
+
+
+    <!-- Login Error -->
+    {% if error %}
+    <div class="alert alert-danger">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        {{ error }}
+    </div>
+    {% endif %}
+
+
+    <!-- Password Reset Success -->
+    {% if request.args.get('reset') == 'success' %}
+    <div class="alert alert-success">
+        <i class="fa-solid fa-circle-check"></i>
+        Password reset successfully. Please login with your new password.
+    </div>
+    {% endif %}
+
+
+    <!-- Login Form -->
+    <form method="POST">
+
+        <!-- Username -->
+        <div class="mb-3">
+
+            <label class="form-label">
+                Username
+            </label>
+
+            <div class="input-group">
+
+                <span class="input-group-text">
+                    <i class="fa-solid fa-user"></i>
+                </span>
+
+                <input
+                    type="text"
+                    name="username"
+                    class="form-control"
+                    placeholder="Enter admin username"
+                    autocomplete="username"
+                    required>
+
+            </div>
+
+        </div>
+
+
+        <!-- Password -->
+        <div class="mb-3">
+
+            <label class="form-label">
+                Password
+            </label>
+
+            <div class="input-group">
+
+                <span class="input-group-text">
+                    <i class="fa-solid fa-lock"></i>
+                </span>
+
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    class="form-control"
+                    placeholder="Enter password"
+                    autocomplete="current-password"
+                    required>
+
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary password-btn"
+                    onclick="togglePassword()"
+                    aria-label="Show or hide password">
+
+                    <i id="eye" class="fa-solid fa-eye"></i>
+
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- Remember Me + Forgot Password -->
+        <div class="extra">
+
+            <label>
+                <input
+                    type="checkbox"
+                    name="remember">
+                Remember Me
+            </label>
+
+            <!-- IMPORTANT:
+                 This now opens the OTP password reset page
+                 instead of showing the old alert.
+            -->
+            <a href="{{ url_for('forgot_password') }}">
+                Forgot Password?
+            </a>
+
+        </div>
+
+
+        <!-- Login Button -->
+        <button
+            type="submit"
+            class="btn btn-primary btn-login">
+
+            🔐 Login To Admin Panel
+
+        </button>
+
+
+        <!-- Back To Home -->
+        <a
+            href="/"
+            class="btn btn-outline-light back-btn">
+
+            ← Back To Home
+
+        </a>
+
+
+        <!-- Public Modules -->
+        <div class="quick-title">
+            Open Public Modules Directly
+        </div>
+
+        <div class="quick-links">
+
+            <a href="/" class="btn btn-primary">
+                🌐 URL Scan
+            </a>
+
+            <a href="/email" class="btn btn-danger">
+                📧 Email Scan
+            </a>
+
+            <a href="/content" class="btn btn-info">
+                📝 Content Check
+            </a>
+
+            <a href="/file" class="btn btn-secondary">
+                📁 File Verify
+            </a>
+
+            <a
+                href="/dashboard"
+                class="btn btn-warning full-link">
+
+                📊 Deduction Report
+
+            </a>
+
+        </div>
+
+
+        <!-- Security Note -->
+        <div class="security-note">
+
+            <i class="fa-solid fa-shield-halved"></i>
+
+            Admin login is required only for Scan History,
+            Login History, Delete, Clear, CSV Export and PDF Export.
+
+        </div>
+
+    </form>
+
+
+    <!-- Footer -->
+    <div class="footer">
+
+        <hr>
+
+        MCA Final Year Capstone Project
+
+    </div>
+
+</div>
+
+
+<script>
+
+function togglePassword(){
+
+    let input = document.getElementById("password");
+    let eye = document.getElementById("eye");
+
+    if(input.type === "password"){
+
+        input.type = "text";
+
+        eye.className = "fa-solid fa-eye-slash";
+
+    }
+    else{
+
+        input.type = "password";
+
+        eye.className = "fa-solid fa-eye";
+
+    }
+
+}
+
+</script>
+
+</body>
+
+</html>

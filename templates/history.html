@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Scan History</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+body{
+    background:linear-gradient(135deg,#0f172a,#111827);
+    color:#e5e7eb;
+    font-family:Segoe UI,Arial,sans-serif;
+}
+
+body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background:radial-gradient(circle,#38bdf822 1px,transparent 1px);
+    background-size:40px 40px;
+    z-index:-1;
+}
+
+.navbar{
+    background:rgba(15,23,42,0.96);
+    backdrop-filter:blur(12px);
+    border-bottom:1px solid rgba(255,255,255,0.08);
+}
+
+.navbar-brand{
+    color:#38bdf8 !important;
+}
+
+.nav-btn{
+    border-radius:25px;
+    font-size:14px;
+    padding:8px 16px;
+    font-weight:600;
+}
+
+.hero{
+    background:
+    radial-gradient(circle at top left,rgba(56,189,248,0.35),transparent 30%),
+    radial-gradient(circle at bottom right,rgba(16,185,129,0.35),transparent 35%),
+    linear-gradient(135deg,#2563eb,#10b981);
+    padding:50px 30px;
+    border-radius:28px;
+    text-align:center;
+    box-shadow:0 25px 65px rgba(16,185,129,0.25);
+}
+
+.hero h1{
+    font-weight:900;
+}
+
+.glass-card{
+    background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius:22px;
+    box-shadow:0 15px 40px rgba(0,0,0,0.25);
+    backdrop-filter:blur(14px);
+}
+
+.stat-card{
+    background:#020617;
+    border:1px solid #334155;
+    border-radius:20px;
+    padding:23px;
+    text-align:center;
+    transition:.3s;
+    height:100%;
+}
+
+.stat-card:hover{
+    transform:translateY(-7px);
+    border-color:#38bdf8;
+    box-shadow:0 15px 35px rgba(56,189,248,0.15);
+}
+
+.value{
+    font-size:34px;
+    font-weight:800;
+}
+
+.search{
+    max-width:420px;
+    background:#020617 !important;
+    color:#e5e7eb !important;
+    border:1px solid #334155 !important;
+    border-radius:15px !important;
+    padding:12px;
+}
+
+.search::placeholder{
+    color:#94a3b8;
+}
+
+.table-box{
+    background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.12);
+    padding:25px;
+    border-radius:22px;
+    box-shadow:0 15px 40px rgba(0,0,0,0.25);
+}
+
+.history-table{
+    width:100%;
+    border-collapse:separate;
+    border-spacing:0;
+    overflow:hidden;
+    border-radius:16px;
+}
+
+.history-table thead th{
+    background:#020617;
+    color:#38bdf8;
+    border-bottom:1px solid #334155;
+    padding:15px 12px;
+    font-size:14px;
+    text-align:center;
+    white-space:nowrap;
+}
+
+.history-table tbody tr{
+    background:#0f172a;
+    transition:0.25s;
+}
+
+.history-table tbody tr:hover{
+    background:#1e293b;
+}
+
+.history-table td{
+    color:#e5e7eb;
+    border-bottom:1px solid #334155;
+    padding:14px 12px;
+    vertical-align:middle;
+    text-align:center;
+    font-size:14px;
+}
+
+.history-table tbody tr:last-child td{
+    border-bottom:none;
+}
+
+.high-risk{
+    background:rgba(127,29,29,0.25) !important;
+}
+
+.medium-risk{
+    background:rgba(120,53,15,0.25) !important;
+}
+
+.low-risk{
+    background:rgba(20,83,45,0.18) !important;
+}
+
+.input-cell{
+    min-width:330px;
+    max-width:430px;
+    text-align:left !important;
+}
+
+.input-text{
+    background:#020617;
+    color:#f8fafc !important;
+    border:1px solid #334155;
+    border-radius:12px;
+    padding:10px 12px;
+    line-height:1.55;
+    max-height:95px;
+    overflow-y:auto;
+    word-break:break-word;
+    white-space:normal;
+    font-size:13px;
+}
+
+.input-text::-webkit-scrollbar{
+    width:6px;
+}
+
+.input-text::-webkit-scrollbar-thumb{
+    background:#475569;
+    border-radius:20px;
+}
+
+.input-text a{
+    color:#38bdf8 !important;
+    text-decoration:none;
+    font-weight:700;
+}
+
+.input-text a:hover{
+    text-decoration:underline;
+}
+
+.badge{
+    padding:9px 13px;
+    font-size:12px;
+    border-radius:20px;
+    font-weight:700;
+}
+
+.score-text{
+    font-weight:800;
+    color:#f8fafc;
+}
+
+.date-cell{
+    min-width:175px;
+    color:#e2e8f0 !important;
+    font-weight:600;
+}
+
+.date-small{
+    display:block;
+    font-size:12px;
+    color:#94a3b8;
+    margin-top:3px;
+}
+
+.action-btn{
+    border-radius:20px;
+    font-weight:600;
+}
+
+.delete-btn{
+    border:1px solid #ef4444;
+    color:#ef4444;
+    background:transparent;
+    border-radius:50%;
+    width:36px;
+    height:36px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.delete-btn:hover{
+    background:#ef4444;
+    color:white;
+}
+
+.security-box{
+    background:#020617;
+    border:1px solid #334155;
+    border-radius:20px;
+    padding:22px;
+    height:100%;
+}
+
+.footer{
+    color:#94a3b8;
+    text-align:center;
+    margin-top:50px;
+    padding:25px;
+}
+
+@media(max-width:768px){
+    .hero{
+        padding:35px 18px;
+    }
+
+    .nav-btn{
+        width:100%;
+    }
+
+    .input-cell{
+        min-width:280px;
+    }
+}
+</style>
+
+<script>
+function searchTable(){
+    let filter = document.getElementById("search").value.toUpperCase();
+    let rows = document.querySelectorAll("#history tbody tr");
+
+    rows.forEach(row=>{
+        let text = row.innerText.toUpperCase();
+        row.style.display = text.includes(filter) ? "" : "none";
+    });
+}
+
+function confirmDelete(id){
+    if(confirm("Delete this scan record?")){
+        window.location = "/delete_scan/" + id;
+    }
+}
+
+function clearHistory(){
+    if(confirm("Delete ALL scan history?")){
+        window.location = "/clear_history";
+    }
+}
+
+/*
+    Date display fix:
+    - If your database stores UTC like "2026-06-17 08:49:10",
+      this converts it to India time.
+    - If your database already stores AM/PM time, it shows as saved.
+*/
+function formatHistoryDates(){
+    const cells = document.querySelectorAll(".date-cell");
+
+    cells.forEach(cell=>{
+        const raw = cell.getAttribute("data-date");
+
+        if(!raw || raw.trim() === ""){
+            cell.innerHTML = "-";
+            return;
+        }
+
+        if(raw.toUpperCase().includes("AM") || raw.toUpperCase().includes("PM")){
+            cell.innerHTML = raw + '<span class="date-small">IST</span>';
+            return;
+        }
+
+        try{
+            let isoRaw = raw.replace(" ", "T") + "Z";
+            let dateObj = new Date(isoRaw);
+
+            if(isNaN(dateObj.getTime())){
+                cell.innerHTML = raw;
+                return;
+            }
+
+            let formatted = dateObj.toLocaleString("en-IN", {
+                timeZone: "Asia/Kolkata",
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+                hour12: true
+            });
+
+            cell.innerHTML = formatted + '<span class="date-small">IST</span>';
+
+        }catch(e){
+            cell.innerHTML = raw;
+        }
+    });
+}
+
+document.addEventListener("DOMContentLoaded", formatHistoryDates);
+</script>
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+<div class="container-fluid px-4">
+
+<a class="navbar-brand fw-bold" href="/">
+🛡 AI Phishing Detection Site
+</a>
+
+<button
+class="navbar-toggler"
+type="button"
+data-bs-toggle="collapse"
+data-bs-target="#mainNavbar"
+aria-controls="mainNavbar"
+aria-expanded="false"
+aria-label="Toggle navigation">
+<span class="navbar-toggler-icon"></span>
+</button>
+
+<div class="collapse navbar-collapse" id="mainNavbar">
+
+<div class="ms-auto d-flex gap-2 flex-wrap mt-3 mt-lg-0">
+
+<a href="/" class="btn btn-primary nav-btn">🌐 URL</a>
+<a href="/email" class="btn btn-danger nav-btn">📧 Email</a>
+<a href="/content" class="btn btn-info nav-btn">📝 Content</a>
+<a href="/file" class="btn btn-secondary nav-btn">📁 File</a>
+<a href="/history" class="btn btn-success nav-btn">📜 History</a>
+<a href="/login_history" class="btn btn-outline-info nav-btn">🕒 Login History</a>
+<a href="/admins" class="btn btn-outline-warning nav-btn">👤 Admins</a>
+<a href="/dashboard" class="btn btn-warning nav-btn">📊 Deduction Report</a>
+<a href="/logout" class="btn btn-outline-light nav-btn">🚪 Logout</a>
+
+</div>
+
+</div>
+
+</div>
+</nav>
+
+<div class="container mt-5">
+
+<div class="hero">
+<h1>📜 Scan History</h1>
+<p class="fs-5 mt-3 mb-0">
+Admin panel to monitor, search, export and manage URL, Email, Content and File verification records.
+</p>
+</div>
+
+<div class="glass-card mt-4 p-3 text-center">
+🛡 Monitoring <strong>{{ scans|length }}</strong> threat records in the AI Phishing Detection Site
+</div>
+
+<div class="row g-4 mt-4">
+
+<div class="col-md-2 col-sm-6">
+<div class="stat-card">
+<div class="value text-info">{{ scans|length }}</div>
+<h6>Total</h6>
+</div>
+</div>
+
+<div class="col-md-2 col-sm-6">
+<div class="stat-card">
+<div class="value text-primary">
+{{ scans|selectattr("1","equalto","URL")|list|length }}
+</div>
+<h6>URL</h6>
+</div>
+</div>
+
+<div class="col-md-2 col-sm-6">
+<div class="stat-card">
+<div class="value text-danger">
+{{ scans|selectattr("1","equalto","EMAIL")|list|length }}
+</div>
+<h6>Email</h6>
+</div>
+</div>
+
+<div class="col-md-2 col-sm-6">
+<div class="stat-card">
+<div class="value text-info">
+{{ scans|selectattr("1","equalto","CONTENT")|list|length }}
+</div>
+<h6>Content</h6>
+</div>
+</div>
+
+<div class="col-md-2 col-sm-6">
+<div class="stat-card">
+<div class="value text-secondary">
+{{ scans|selectattr("1","equalto","FILE")|list|length }}
+</div>
+<h6>File</h6>
+</div>
+</div>
+
+<div class="col-md-2 col-sm-6">
+<div class="stat-card">
+<div class="value text-warning">
+{{ scans|selectattr("5","equalto","High")|list|length }}
+</div>
+<h6>High Risk</h6>
+</div>
+</div>
+
+</div>
+
+<div class="glass-card mt-5 p-4">
+<div class="d-flex flex-wrap gap-3 justify-content-between align-items-center">
+
+<input
+id="search"
+class="form-control search"
+placeholder="🔍 Search scan history..."
+onkeyup="searchTable()"
+>
+
+<div class="d-flex gap-2 flex-wrap">
+
+<a href="/export_history_csv" class="btn btn-outline-success action-btn px-4">
+📄 Export CSV
+</a>
+
+<a href="/export_history_pdf" class="btn btn-outline-danger action-btn px-4">
+📕 Export PDF
+</a>
+
+<button class="btn btn-danger action-btn px-4" onclick="clearHistory()">
+🗑 Clear All
+</button>
+
+</div>
+
+</div>
+</div>
+
+<div class="table-box mt-4">
+
+{% if scans %}
+
+<div class="table-responsive">
+
+<table id="history" class="history-table">
+
+<thead>
+<tr>
+<th>ID</th>
+<th>Type</th>
+<th>Input</th>
+<th>Prediction</th>
+<th>Score</th>
+<th>Risk</th>
+<th>Date & Time</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for scan in scans %}
+
+<tr class="
+{% if scan[5]=='High' %}
+high-risk
+{% elif scan[5]=='Medium' %}
+medium-risk
+{% else %}
+low-risk
+{% endif %}
+">
+
+<td class="fw-bold">{{ scan[0] }}</td>
+
+<td>
+{% if scan[1]=="URL" %}
+<span class="badge bg-primary">🌐 URL</span>
+{% elif scan[1]=="EMAIL" %}
+<span class="badge bg-danger">📧 EMAIL</span>
+{% elif scan[1]=="CONTENT" %}
+<span class="badge bg-info text-dark">📝 CONTENT</span>
+{% elif scan[1]=="FILE" %}
+<span class="badge bg-secondary">📁 FILE</span>
+{% else %}
+<span class="badge bg-dark">❓ {{ scan[1] }}</span>
+{% endif %}
+</td>
+
+<td class="input-cell">
+<div class="input-text">
+{% if scan[1]=="URL" and scan[2] and scan[2].startswith("http") %}
+<a href="{{ scan[2] }}" target="_blank">{{ scan[2] }}</a>
+{% else %}
+{{ scan[2] }}
+{% endif %}
+</div>
+</td>
+
+<td>
+{% if "Phishing" in scan[3] or "Unsafe" in scan[3] %}
+<span class="badge bg-danger">⚠ {{ scan[3] }}</span>
+{% elif "Suspicious" in scan[3] or "Scan Error" in scan[3] %}
+<span class="badge bg-warning text-dark">⚠ {{ scan[3] }}</span>
+{% else %}
+<span class="badge bg-success">✅ {{ scan[3] }}</span>
+{% endif %}
+</td>
+
+<td>
+<span class="score-text">{{ scan[4] }}%</span>
+</td>
+
+<td>
+{% if scan[5]=="High" %}
+<span class="badge bg-danger">🔴 High</span>
+{% elif scan[5]=="Medium" %}
+<span class="badge bg-warning text-dark">🟠 Medium</span>
+{% else %}
+<span class="badge bg-success">🟢 Low</span>
+{% endif %}
+</td>
+
+<td class="date-cell" data-date="{{ scan[6] }}">
+{{ scan[6] }}
+</td>
+
+<td>
+<button class="delete-btn" onclick="confirmDelete({{ scan[0] }})" title="Delete record">
+🗑
+</button>
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+</table>
+
+</div>
+
+{% else %}
+
+<div class="alert alert-info text-center">
+<h4>No Scan History</h4>
+<p>Run URL, Email, Content or File scans to populate history.</p>
+</div>
+
+{% endif %}
+
+</div>
+
+<div class="glass-card mt-4 p-4">
+
+<h4>🔐 Admin History Security Rules</h4>
+
+<div class="row g-3 mt-2">
+
+<div class="col-md-4">
+<div class="security-box">
+<h5>✅ Admin Protected</h5>
+<p class="text-secondary mb-0">
+Only logged-in admins can access scan history and exported reports.
+</p>
+</div>
+</div>
+
+<div class="col-md-4">
+<div class="security-box">
+<h5>✅ Export Control</h5>
+<p class="text-secondary mb-0">
+CSV and PDF reports are available only inside the protected admin area.
+</p>
+</div>
+</div>
+
+<div class="col-md-4">
+<div class="security-box">
+<h5>✅ Record Management</h5>
+<p class="text-secondary mb-0">
+Admins can delete individual records or clear complete scan history.
+</p>
+</div>
+</div>
+
+</div>
+
+</div>
+
+<div class="footer">
+<hr>
+<h5>🛡 AI-Powered Phishing Detection Site</h5>
+<p>Flask | SQLite | Machine Learning | XGBoost | Content Checking | File Verification</p>
+<p>Admin Scan History Management | MCA Postgraduate Final Year Project</p>
+</div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

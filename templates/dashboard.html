@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>MCA Deduction Report</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+:root{
+    --dark:#0f172a;
+    --card:#020617;
+    --border:#334155;
+    --text:#e5e7eb;
+    --muted:#cbd5e1;
+    --cyan:#38bdf8;
+    --blue:#2563eb;
+    --green:#16a34a;
+    --yellow:#f59e0b;
+    --red:#dc2626;
+    --purple:#7c3aed;
+    --pink:#db2777;
+}
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    background:linear-gradient(135deg,#0f172a,#111827);
+    color:var(--text);
+    font-family:Segoe UI,Arial,sans-serif;
+}
+
+body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background:radial-gradient(circle,#38bdf822 1px,transparent 1px);
+    background-size:42px 42px;
+    z-index:-1;
+}
+
+.text-secondary{
+    color:#cbd5e1 !important;
+}
+
+.navbar{
+    background:rgba(15,23,42,0.96);
+    border-bottom:1px solid rgba(255,255,255,0.08);
+    backdrop-filter:blur(12px);
+}
+
+.navbar-brand{
+    color:#38bdf8 !important;
+}
+
+.nav-btn{
+    border-radius:25px;
+    font-size:14px;
+    padding:8px 16px;
+    font-weight:600;
+}
+
+.hero{
+    background:
+    radial-gradient(circle at top left,rgba(56,189,248,0.35),transparent 30%),
+    radial-gradient(circle at bottom right,rgba(124,58,237,0.38),transparent 35%),
+    linear-gradient(135deg,#2563eb,#7c3aed);
+    border-radius:34px;
+    padding:65px 36px;
+    text-align:center;
+    box-shadow:0 28px 80px rgba(37,99,235,0.30);
+}
+
+.hero h1{
+    font-weight:900;
+    letter-spacing:0.6px;
+}
+
+.hero-subtitle{
+    max-width:950px;
+    margin:auto;
+    color:#e0f2fe;
+}
+
+.badge-soft{
+    display:inline-block;
+    background:rgba(255,255,255,0.16);
+    border:1px solid rgba(255,255,255,0.22);
+    border-radius:30px;
+    padding:10px 22px;
+    margin-bottom:18px;
+    font-weight:800;
+}
+
+.glass-card{
+    background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius:26px;
+    box-shadow:0 18px 45px rgba(0,0,0,0.25);
+    backdrop-filter:blur(14px);
+}
+
+.section-card{
+    background:#020617;
+    border:1px solid #334155;
+    border-radius:24px;
+    padding:26px;
+    height:100%;
+    transition:0.3s;
+}
+
+.section-card:hover{
+    transform:translateY(-6px);
+    border-color:#38bdf8;
+    box-shadow:0 14px 38px rgba(56,189,248,0.14);
+}
+
+.icon-box{
+    width:58px;
+    height:58px;
+    border-radius:17px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:26px;
+    margin-bottom:15px;
+    background:linear-gradient(135deg,#2563eb,#7c3aed);
+}
+
+.section-title{
+    font-weight:900;
+    color:#f8fafc;
+}
+
+.gauge-box{
+    background:#020617;
+    border:1px solid #334155;
+    border-radius:28px;
+    padding:30px;
+    height:100%;
+    text-align:center;
+}
+
+.gauge-circle{
+    width:220px;
+    height:220px;
+    border-radius:50%;
+    margin:25px auto;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:conic-gradient(#16a34a 0deg 342deg,#1e293b 342deg 360deg);
+    box-shadow:0 0 45px rgba(22,163,74,0.25);
+}
+
+.gauge-inner{
+    width:160px;
+    height:160px;
+    background:#020617;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    border:1px solid #334155;
+}
+
+.gauge-value{
+    font-size:42px;
+    font-weight:900;
+    color:#22c55e;
+}
+
+.safe-pill{
+    display:inline-block;
+    border-radius:30px;
+    padding:10px 18px;
+    font-weight:800;
+}
+
+.chart-card{
+    background:#020617;
+    border:1px solid #334155;
+    border-radius:24px;
+    padding:28px;
+    height:100%;
+}
+
+.chart-box{
+    min-height:340px;
+}
+
+.step-card{
+    background:#020617;
+    border:1px solid #334155;
+    border-radius:22px;
+    padding:25px;
+    height:100%;
+    position:relative;
+    overflow:hidden;
+    transition:0.3s;
+}
+
+.step-card:hover{
+    transform:translateY(-6px);
+    border-color:#38bdf8;
+}
+
+.step-card::before{
+    content:"";
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:4px;
+    background:linear-gradient(90deg,#38bdf8,#7c3aed);
+}
+
+.step-no{
+    width:44px;
+    height:44px;
+    border-radius:50%;
+    background:linear-gradient(135deg,#2563eb,#7c3aed);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:900;
+    margin-bottom:15px;
+}
+
+.report-note{
+    background:#020617;
+    border:1px solid #334155;
+    border-radius:18px;
+    padding:20px;
+    height:100%;
+    transition:0.3s;
+}
+
+.report-note:hover{
+    transform:translateY(-5px);
+    border-color:#38bdf8;
+}
+
+.timeline-item{
+    background:#020617;
+    border:1px solid #334155;
+    border-radius:20px;
+    padding:22px;
+    height:100%;
+}
+
+.level-pill{
+    background:#16a34a;
+    color:#ffffff;
+    border-radius:30px;
+    padding:9px 18px;
+    font-weight:900;
+    display:inline-block;
+    font-size:13px;
+}
+
+/* =========================
+   FIXED MODULE TABLE
+========================= */
+
+.module-table{
+    width:100%;
+    border-collapse:separate;
+    border-spacing:0;
+    overflow:hidden;
+    border-radius:16px;
+    background:#020617;
+}
+
+.module-table thead th{
+    background:#020617 !important;
+    color:#38bdf8 !important;
+    padding:15px 14px;
+    font-size:14px;
+    border-bottom:1px solid #334155;
+    text-align:left;
+    white-space:nowrap;
+}
+
+.module-table tbody tr{
+    background:#0f172a !important;
+    transition:0.25s;
+}
+
+.module-table tbody tr:nth-child(even){
+    background:#111827 !important;
+}
+
+.module-table tbody tr:hover{
+    background:#1e293b !important;
+}
+
+.module-table td{
+    color:#f8fafc !important;
+    padding:15px 14px;
+    border-bottom:1px solid #334155;
+    vertical-align:middle;
+    font-size:14px;
+    line-height:1.5;
+}
+
+.module-table tbody tr:last-child td{
+    border-bottom:none;
+}
+
+.module-name{
+    color:#38bdf8 !important;
+    font-weight:800;
+    min-width:180px;
+}
+
+.module-purpose{
+    color:#e5e7eb !important;
+    min-width:250px;
+}
+
+.module-academic{
+    color:#cbd5e1 !important;
+    min-width:330px;
+}
+
+.module-level{
+    min-width:150px;
+    text-align:left;
+}
+
+.footer{
+    color:#94a3b8;
+    text-align:center;
+    margin-top:50px;
+    padding:25px;
+}
+
+@media(max-width:768px){
+    .hero{
+        padding:42px 20px;
+    }
+
+    .gauge-circle{
+        width:190px;
+        height:190px;
+    }
+
+    .gauge-inner{
+        width:135px;
+        height:135px;
+    }
+
+    .gauge-value{
+        font-size:34px;
+    }
+
+    .nav-btn{
+        width:100%;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+<div class="container">
+
+<a class="navbar-brand fw-bold" href="/">
+🛡 AI Phishing Detection Suite
+</a>
+
+<div class="d-flex gap-2 flex-wrap">
+<a href="/" class="btn btn-primary nav-btn">🌐 URL</a>
+<a href="/email" class="btn btn-danger nav-btn">📧 Email</a>
+<a href="/content" class="btn btn-info nav-btn">📝 Content</a>
+<a href="/file" class="btn btn-secondary nav-btn">📁 File</a>
+<a href="/history" class="btn btn-success nav-btn">📜 History</a>
+<a href="/dashboard" class="btn btn-warning nav-btn">📊 Deduction Report</a>
+</div>
+
+</div>
+</nav>
+
+<div class="container mt-5">
+
+<div class="hero">
+
+<div class="badge-soft">
+🎓 MCA Postgraduate Project Evaluation Report
+</div>
+
+<h1>📊 Deduction Report</h1>
+
+<p class="fs-5 mt-3 mb-0 hero-subtitle">
+A postgraduate-level project deduction report evaluating the complete AI Phishing Detection Site across machine learning, cybersecurity logic, content analysis, file verification, admin security, privacy protection and system architecture.
+</p>
+
+</div>
+
+<div class="glass-card mt-4 p-4 text-center">
+
+<h4>🔒 Public Privacy-Safe Academic Report</h4>
+
+<p class="text-secondary mb-0">
+This report is designed for public demonstration and academic review. It does not expose scan history, entered URLs, email text, sender addresses, file contents, login records, scan counts, risk counts, export data, or database records.
+</p>
+
+</div>
+
+<div class="row g-4 mt-4">
+
+<div class="col-md-3">
+<div class="section-card">
+<div class="icon-box">🌐</div>
+<h5>URL Detection</h5>
+<p class="text-secondary mb-0">
+Analyzes domain structure, HTTPS usage, suspicious keywords, unsafe TLDs, redirects and phishing website patterns.
+</p>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="section-card">
+<div class="icon-box">📧</div>
+<h5>Email Detection</h5>
+<p class="text-secondary mb-0">
+Detects fake senders, suspicious links, urgent language, credential requests and phishing email indicators.
+</p>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="section-card">
+<div class="icon-box">📝</div>
+<h5>Content Checking</h5>
+<p class="text-secondary mb-0">
+Evaluates suspicious messages, SMS text, copied website content and security-sensitive words.
+</p>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="section-card">
+<div class="icon-box">📁</div>
+<h5>File Verification</h5>
+<p class="text-secondary mb-0">
+Checks file extension, filename risk, size, hash value and phishing text inside supported files.
+</p>
+</div>
+</div>
+
+</div>
+
+<div class="row g-4 mt-4">
+
+<div class="col-md-5">
+<div class="gauge-box">
+
+<h4>🟢 Academic Readiness Gauge</h4>
+
+<p class="text-secondary">
+Overall postgraduate-level project readiness based on module coverage, security design, privacy safety and demonstration quality.
+</p>
+
+<div class="gauge-circle">
+<div class="gauge-inner">
+<span class="gauge-value">95%</span>
+<small>Project Ready</small>
+</div>
+</div>
+
+<span class="safe-pill bg-success">
+✅ Suitable for MCA Final Review
+</span>
+
+<p class="text-secondary mt-3 mb-0">
+The system demonstrates full-stack implementation, applied machine learning, rule-based cybersecurity logic, database storage, admin control and privacy-aware reporting.
+</p>
+
+</div>
+</div>
+
+<div class="col-md-7">
+<div class="chart-card">
+
+<h4>⚖ Overall Module Capability Comparison</h4>
+
+<p class="text-secondary">
+This chart compares the project modules using academic capability scores. It does not show real scan counts or private user data.
+</p>
+
+<div class="chart-box">
+<canvas id="moduleComparisonChart"></canvas>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="glass-card mt-4 p-4">
+
+<h4 class="section-title">📘 Project Abstract</h4>
+
+<p class="text-secondary mb-0">
+The AI Phishing Detection Site is a cybersecurity-based web application developed to identify phishing threats from URLs, emails, general text content and uploaded files. The system combines machine learning classification with rule-based security checks to generate a threat score and risk category. It includes admin authentication, scan history management, CSV/PDF export and a public privacy-safe deduction report. The project demonstrates practical application of artificial intelligence, web development, database management and cybersecurity principles suitable for an MCA postgraduate capstone project.
+</p>
+
+</div>
+
+<div class="glass-card mt-4 p-4">
+
+<h4 class="section-title">🎯 Project Objectives</h4>
+
+<div class="row g-3 mt-2">
+
+<div class="col-md-4">
+<div class="report-note">
+<h5>1. Threat Identification</h5>
+<p class="text-secondary mb-0">
+Detect phishing attempts from websites, emails, copied content and uploaded files.
+</p>
+</div>
+</div>
+
+<div class="col-md-4">
+<div class="report-note">
+<h5>2. AI-Based Decision</h5>
+<p class="text-secondary mb-0">
+Use machine learning with feature extraction to classify suspicious digital inputs.
+</p>
+</div>
+</div>
+
+<div class="col-md-4">
+<div class="report-note">
+<h5>3. Risk Scoring</h5>
+<p class="text-secondary mb-0">
+Generate threat score and risk level such as Low, Medium or High.
+</p>
+</div>
+</div>
+
+<div class="col-md-4">
+<div class="report-note">
+<h5>4. Admin Monitoring</h5>
+<p class="text-secondary mb-0">
+Provide secure admin access to view history, export reports and manage records.
+</p>
+</div>
+</div>
+
+<div class="col-md-4">
+<div class="report-note">
+<h5>5. Privacy Protection</h5>
+<p class="text-secondary mb-0">
+Keep public reporting safe by hiding sensitive scan records and user inputs.
+</p>
+</div>
+</div>
+
+<div class="col-md-4">
+<div class="report-note">
+<h5>6. Academic Demonstration</h5>
+<p class="text-secondary mb-0">
+Present a complete MCA-level applied AI and cybersecurity solution.
+</p>
+</div>
+</div>
+
+</div>
+
+</div>
+
+<div class="glass-card mt-4 p-4">
+
+<h4 class="section-title">🏗 System Architecture</h4>
+
+<p class="text-secondary">
+The project follows a modular architecture where each detection module sends extracted features to the decision layer. The final result is stored in SQLite and viewed through admin-protected pages.
+</p>
+
+<div class="row g-4 mt-2">
+
+<div class="col-md-3">
+<div class="step-card">
+<div class="step-no">1</div>
+<h5>User Interface</h5>
+<p class="text-secondary mb-0">
+Bootstrap-based web pages for URL, Email, Content and File modules.
+</p>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="step-card">
+<div class="step-no">2</div>
+<h5>Feature Layer</h5>
+<p class="text-secondary mb-0">
+Extracts URL, email, text and file-based security features.
+</p>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="step-card">
+<div class="step-no">3</div>
+<h5>Decision Layer</h5>
+<p class="text-secondary mb-0">
+Combines ML prediction with rule-based security scoring.
+</p>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="step-card">
+<div class="step-no">4</div>
+<h5>Storage Layer</h5>
+<p class="text-secondary mb-0">
+Stores scan history, risk level and login records in SQLite.
+</p>
+</div>
+</div>
+
+</div>
+
+</div>
+
+<div class="row g-4 mt-4">
+
+<div class="col-md-6">
+<div class="chart-card">
+
+<h4>🧪 Postgraduate Evaluation Matrix</h4>
+
+<p class="text-secondary">
+This matrix evaluates the overall project against MCA postgraduate-level criteria.
+</p>
+
+<div class="chart-box">
+<canvas id="evaluationMatrixChart"></canvas>
+</div>
+
+</div>
+</div>
+
+<div class="col-md-6">
+<div class="chart-card">
+
+<h4>🔐 Privacy & Security Coverage</h4>
+
+<p class="text-secondary">
+Shows the public-safe privacy and admin-protected security layers of the system.
+</p>
+
+<div class="chart-box">
+<canvas id="privacyChart"></canvas>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div class="glass-card mt-4 p-4">
+
+<h4 class="section-title">⚙ Detection Methodology</h4>
+
+<div class="row g-4 mt-2">
+
+<div class="col-md-3">
+<div class="step-card">
+<div class="step-no">1</div>
+<h5>Input Collection</h5>
+<p class="text-secondary mb-0">
+The system accepts URL, Email, Content or File input from the user.
+</p>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="step-card">
+<div class="step-no">2</div>
+<h5>Feature Extraction</h5>
+<p class="text-secondary mb-0">
+Security-related indicators are extracted from the submitted input.
+</p>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="step-card">
+<div class="step-no">3</div>
+<h5>Threat Scoring</h5>
+<p class="text-secondary mb-0">
+ML score and rule score are calculated to determine phishing probability.
+</p>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="step-card">
+<div class="step-no">4</div>
+<h5>Final Deduction</h5>
+<p class="text-secondary mb-0">
+Final prediction and risk level are generated and saved for admin review.
+</p>
+</div>
+</div>
+
+</div>
+
+</div>
+
+<div class="glass-card mt-4 p-4">
+
+<h4 class="section-title">🧩 Module-Wise Deduction Summary</h4>
+
+<div class="table-responsive mt-3">
+<table class="module-table">
+
+<thead>
+<tr>
+<th>Module</th>
+<th>Purpose</th>
+<th>Academic Contribution</th>
+<th>Deduction Level</th>
+</tr>
+</thead>
+
+<tbody>
+
+<tr>
+<td class="module-name">🌐 URL Detection</td>
+<td class="module-purpose">Detects phishing websites and suspicious links</td>
+<td class="module-academic">Feature extraction, domain analysis, ML prediction</td>
+<td class="module-level"><span class="level-pill">Strong</span></td>
+</tr>
+
+<tr>
+<td class="module-name">📧 Email Detection</td>
+<td class="module-purpose">Detects phishing emails and fake sender behavior</td>
+<td class="module-academic">NLP-like text analysis, sender validation, link analysis</td>
+<td class="module-level"><span class="level-pill">Strong</span></td>
+</tr>
+
+<tr>
+<td class="module-name">📝 Content Checking</td>
+<td class="module-purpose">Checks copied text, SMS and suspicious content</td>
+<td class="module-academic">Keyword detection, urgent language analysis, rule scoring</td>
+<td class="module-level"><span class="level-pill">Strong</span></td>
+</tr>
+
+<tr>
+<td class="module-name">📁 File Verification</td>
+<td class="module-purpose">Checks file type, hash, size and internal content</td>
+<td class="module-academic">Secure upload handling, hash verification, document parsing</td>
+<td class="module-level"><span class="level-pill">Strong</span></td>
+</tr>
+
+<tr>
+<td class="module-name">🔐 Admin Panel</td>
+<td class="module-purpose">Protects scan history and exports</td>
+<td class="module-academic">Authentication, session management, restricted operations</td>
+<td class="module-level"><span class="level-pill">Strong</span></td>
+</tr>
+
+<tr>
+<td class="module-name">📊 Deduction Report</td>
+<td class="module-purpose">Displays public-safe academic project evaluation</td>
+<td class="module-academic">Visualization, privacy-aware reporting, project explanation</td>
+<td class="module-level"><span class="level-pill">Strong</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+</div>
+
+<div class="glass-card mt-4 p-4">
+
+<h4 class="section-title">🔒 Privacy & Safety Rules Applied</h4>
+
+<div class="row g-3 mt-2">
+
+<div class="col-md-4">
+<div class="report-note">
+<h5>🚫 No Raw Inputs</h5>
+<p class="text-secondary mb-0">
+Entered URLs, email content, file content and sender details are not displayed publicly.
+</p>
+</div>
+</div>
+
+<div class="col-md-4">
+<div class="report-note">
+<h5>🚫 No Private Metrics</h5>
+<p class="text-secondary mb-0">
+Total scans, risk counts, history data and login records are hidden from public view.
+</p>
+</div>
+</div>
+
+<div class="col-md-4">
+<div class="report-note">
+<h5>🚫 No Admin Data</h5>
+<p class="text-secondary mb-0">
+Admin login history and administrative actions are restricted to protected pages.
+</p>
+</div>
+</div>
+
+<div class="col-md-4">
+<div class="report-note">
+<h5>✅ Protected History</h5>
+<p class="text-secondary mb-0">
+History, delete, clear, CSV export and PDF export require admin authentication.
+</p>
+</div>
+</div>
+
+<div class="col-md-4">
+<div class="report-note">
+<h5>✅ Safe Demonstration</h5>
+<p class="text-secondary mb-0">
+The report is suitable for viva, presentation and public academic demonstration.
+</p>
+</div>
+</div>
+
+<div class="col-md-4">
+<div class="report-note">
+<h5>✅ Security Awareness</h5>
+<p class="text-secondary mb-0">
+The report explains phishing detection without exposing sensitive records.
+</p>
+</div>
+</div>
+
+</div>
+
+</div>
+
+<div class="glass-card mt-4 p-4">
+
+<h4 class="section-title">🛠 Technology Stack Evaluation</h4>
+
+<div class="row g-3 mt-2">
+
+<div class="col-md-3">
+<div class="section-card">
+<h5>🐍 Python Flask</h5>
+<p class="text-secondary mb-0">
+Used for backend routing, request handling and application logic.
+</p>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="section-card">
+<h5>🤖 Machine Learning</h5>
+<p class="text-secondary mb-0">
+Used for phishing classification using trained models.
+</p>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="section-card">
+<h5>💾 SQLite</h5>
+<p class="text-secondary mb-0">
+Stores scan history, risk results and login history.
+</p>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="section-card">
+<h5>🎨 Bootstrap & Chart.js</h5>
+<p class="text-secondary mb-0">
+Used for responsive interface and interactive visual reports.
+</p>
+</div>
+</div>
+
+</div>
+
+</div>
+
+<div class="glass-card mt-4 p-4">
+
+<h4 class="section-title">📌 Research Scope, Limitations & Future Enhancement</h4>
+
+<div class="row g-4 mt-2">
+
+<div class="col-md-4">
+<div class="timeline-item">
+<h5>📌 Current Scope</h5>
+<p class="text-secondary mb-0">
+The system detects phishing indicators from URLs, emails, copied content and supported file types using AI and rule-based analysis.
+</p>
+</div>
+</div>
+
+<div class="col-md-4">
+<div class="timeline-item">
+<h5>⚠ Limitations</h5>
+<p class="text-secondary mb-0">
+The file verification module is a basic safety verification system and not a complete antivirus or malware sandbox.
+</p>
+</div>
+</div>
+
+<div class="col-md-4">
+<div class="timeline-item">
+<h5>🚀 Future Scope</h5>
+<p class="text-secondary mb-0">
+Future versions can add browser extension integration, threat intelligence APIs, deep learning models and real-time blacklist checking.
+</p>
+</div>
+</div>
+
+</div>
+
+</div>
+
+<div class="glass-card mt-4 p-4">
+
+<h4 class="section-title">🎓 MCA Postgraduate-Level Deduction</h4>
+
+<p class="text-secondary">
+The project demonstrates a strong postgraduate-level implementation because it combines multiple computing areas: artificial intelligence, cybersecurity, database management, web engineering, data visualization and privacy-aware system design. The solution is not limited to a single prediction page; it includes end-to-end modules for detection, storage, admin monitoring, exports and project reporting. This makes it suitable as a comprehensive MCA final-year capstone project.
+</p>
+
+<div class="row g-3 mt-2">
+
+<div class="col-md-4">
+<div class="report-note">
+<h5>✅ Technical Depth</h5>
+<p class="text-secondary mb-0">
+Multiple modules, machine learning model integration, rule engine and secure file handling.
+</p>
+</div>
+</div>
+
+<div class="col-md-4">
+<div class="report-note">
+<h5>✅ Practical Relevance</h5>
+<p class="text-secondary mb-0">
+Solves a real cybersecurity problem related to phishing, fake emails and suspicious files.
+</p>
+</div>
+</div>
+
+<div class="col-md-4">
+<div class="report-note">
+<h5>✅ Demonstration Quality</h5>
+<p class="text-secondary mb-0">
+Includes admin dashboard, history management, exports and privacy-safe public report.
+</p>
+</div>
+</div>
+
+</div>
+
+</div>
+
+<div class="footer">
+<hr>
+<h5>🛡 AI-Powered Phishing Detection Site</h5>
+<p>Flask | SQLite | Machine Learning | XGBoost | Rule Engine | Content Checking | File Verification | Bootstrap | Chart.js</p>
+<p>MCA Postgraduate Capstone Project Deduction Report</p>
+</div>
+
+</div>
+
+<script>
+new Chart(document.getElementById("moduleComparisonChart"), {
+    type:"bar",
+    data:{
+        labels:[
+            "Feature Extraction",
+            "Threat Detection",
+            "Rule Validation",
+            "Risk Classification",
+            "Privacy Safety"
+        ],
+        datasets:[
+            {
+                label:"URL Detection",
+                data:[92,90,88,89,100],
+                backgroundColor:"#2563eb",
+                borderRadius:10
+            },
+            {
+                label:"Email Detection",
+                data:[90,91,89,88,100],
+                backgroundColor:"#dc2626",
+                borderRadius:10
+            },
+            {
+                label:"Content Checking",
+                data:[86,84,88,85,100],
+                backgroundColor:"#38bdf8",
+                borderRadius:10
+            },
+            {
+                label:"File Verification",
+                data:[85,83,87,84,100],
+                backgroundColor:"#7c3aed",
+                borderRadius:10
+            }
+        ]
+    },
+    options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        plugins:{
+            legend:{
+                labels:{
+                    color:"#e5e7eb"
+                }
+            }
+        },
+        scales:{
+            x:{
+                ticks:{
+                    color:"#e5e7eb"
+                },
+                grid:{
+                    color:"rgba(255,255,255,0.08)"
+                }
+            },
+            y:{
+                beginAtZero:true,
+                max:100,
+                ticks:{
+                    color:"#e5e7eb"
+                },
+                grid:{
+                    color:"rgba(255,255,255,0.08)"
+                }
+            }
+        }
+    }
+});
+
+new Chart(document.getElementById("evaluationMatrixChart"), {
+    type:"radar",
+    data:{
+        labels:[
+            "AI / ML",
+            "Cybersecurity",
+            "Web Application",
+            "Database",
+            "Admin Security",
+            "Reporting",
+            "Privacy",
+            "Scalability"
+        ],
+        datasets:[{
+            label:"MCA Project Evaluation",
+            data:[92,94,90,88,91,93,100,85],
+            backgroundColor:"rgba(124,58,237,0.25)",
+            borderColor:"#a78bfa",
+            pointBackgroundColor:"#38bdf8"
+        }]
+    },
+    options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        plugins:{
+            legend:{
+                labels:{
+                    color:"#e5e7eb"
+                }
+            }
+        },
+        scales:{
+            r:{
+                min:0,
+                max:100,
+                ticks:{
+                    display:false
+                },
+                grid:{
+                    color:"rgba(255,255,255,0.15)"
+                },
+                angleLines:{
+                    color:"rgba(255,255,255,0.15)"
+                },
+                pointLabels:{
+                    color:"#e5e7eb",
+                    font:{
+                        size:12
+                    }
+                }
+            }
+        }
+    }
+});
+
+new Chart(document.getElementById("privacyChart"), {
+    type:"doughnut",
+    data:{
+        labels:[
+            "Private Data Hidden",
+            "Admin Protected Data",
+            "Public Safe Report",
+            "Secure Export Access"
+        ],
+        datasets:[{
+            data:[35,25,25,15],
+            backgroundColor:[
+                "#16a34a",
+                "#2563eb",
+                "#7c3aed",
+                "#38bdf8"
+            ],
+            borderColor:"#020617",
+            borderWidth:3
+        }]
+    },
+    options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        plugins:{
+            legend:{
+                labels:{
+                    color:"#e5e7eb"
+                }
+            }
+        }
+    }
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Email Phishing Detection</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+body{
+    background:linear-gradient(135deg,#0f172a,#111827);
+    color:#e5e7eb;
+    font-family:Segoe UI,Arial,sans-serif;
+}
+
+body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background:radial-gradient(circle,#38bdf822 1px,transparent 1px);
+    background-size:40px 40px;
+    z-index:-1;
+}
+
+.navbar{
+    background:rgba(15,23,42,0.95);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid rgba(255,255,255,0.08);
+}
+
+.navbar-brand{
+    color:#38bdf8 !important;
+}
+
+.nav-btn{
+    border-radius:25px;
+    font-size:14px;
+    padding:8px 16px;
+}
+
+.hero{
+    background:linear-gradient(135deg,#ef4444,#f97316);
+    border-radius:25px;
+    padding:45px;
+    text-align:center;
+    box-shadow:0 20px 50px rgba(239,68,68,0.25);
+}
+
+.glass-card{
+    background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius:22px;
+    box-shadow:0 15px 40px rgba(0,0,0,0.25);
+    backdrop-filter:blur(14px);
+}
+
+textarea{
+    resize:none;
+    background:#020617 !important;
+    color:#e5e7eb !important;
+    border:1px solid #334155 !important;
+    border-radius:15px !important;
+}
+
+textarea::placeholder{
+    color:#94a3b8 !important;
+}
+
+.analyze-btn{
+    background:linear-gradient(135deg,#ef4444,#f97316);
+    border:none;
+    border-radius:15px;
+    font-weight:700;
+    padding:14px;
+}
+
+.analyze-btn:hover{
+    opacity:0.95;
+    transform:translateY(-1px);
+}
+
+.score-circle{
+    width:160px;
+    height:160px;
+    border-radius:50%;
+    margin:auto;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.score-inner{
+    width:125px;
+    height:125px;
+    background:#020617;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+}
+
+.score-value{
+    font-size:32px;
+    font-weight:800;
+}
+
+.badge-risk{
+    padding:12px 22px;
+    border-radius:30px;
+    font-size:16px;
+}
+
+.indicator{
+    background:#020617;
+    border:1px solid #334155;
+    border-radius:18px;
+    padding:18px;
+    text-align:center;
+    transition:0.3s;
+    min-height:160px;
+}
+
+.indicator:hover{
+    transform:translateY(-6px);
+    border-color:#38bdf8;
+}
+
+.indicator h2{
+    margin-bottom:8px;
+}
+
+.indicator h6{
+    font-weight:700;
+}
+
+.indicator-badge{
+    margin-top:10px;
+    padding:8px 14px;
+    border-radius:20px;
+}
+
+.indicator.safe{
+    border-color:#22c55e55;
+    box-shadow:0 0 15px rgba(34,197,94,0.12);
+}
+
+.indicator.warning{
+    border-color:#f59e0b;
+    box-shadow:0 0 22px rgba(245,158,11,0.22);
+}
+
+.indicator.danger{
+    border-color:#ef4444;
+    box-shadow:0 0 22px rgba(239,68,68,0.25);
+}
+
+.reason-box{
+    background:#020617;
+    border:1px solid #334155;
+    border-radius:18px;
+    padding:20px;
+}
+
+.reason-box ul{
+    margin-bottom:0;
+}
+
+.reason-box li{
+    margin-bottom:8px;
+}
+
+.debug-box{
+    background:#020617;
+    border:1px dashed #475569;
+    border-radius:14px;
+    padding:12px;
+    color:#94a3b8;
+    font-size:13px;
+}
+
+.feature-card{
+    background:#020617;
+    border:1px solid #334155;
+    border-radius:20px;
+    padding:25px;
+    height:100%;
+    text-align:center;
+    transition:0.3s;
+}
+
+.feature-card:hover{
+    transform:translateY(-8px);
+    box-shadow:0 15px 35px rgba(56,189,248,0.15);
+}
+
+.footer{
+    color:#94a3b8;
+    text-align:center;
+    margin-top:50px;
+    padding:25px;
+}
+</style>
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+<div class="container">
+
+<a class="navbar-brand fw-bold" href="/">
+🛡 AI Phishing Detection Site
+</a>
+
+<div class="d-flex gap-2 flex-wrap">
+<a href="/" class="btn btn-primary nav-btn">🌐 URL</a>
+<a href="/email" class="btn btn-danger nav-btn">📧 Email</a>
+<a href="/content" class="btn btn-info nav-btn">📝 Content</a>
+<a href="/file" class="btn btn-secondary nav-btn">📁 File</a>
+<a href="/history" class="btn btn-success nav-btn">📜 History</a>
+<a href="/dashboard" class="btn btn-warning nav-btn">📊 Deduction Report</a>
+</div>
+
+</div>
+</nav>
+
+<div class="container mt-5">
+
+<div class="hero">
+<h1 class="fw-bold">📧 Email Phishing Detection</h1>
+<p class="fs-5 mt-3 mb-0">
+AI-powered email analysis for phishing, fake sender, credential theft and suspicious links.
+</p>
+</div>
+
+<div class="glass-card mt-4 p-4">
+<h3>📨 Paste Email Content</h3>
+
+<form method="POST">
+<textarea name="email_text" class="form-control mt-3" rows="10"
+placeholder="Paste full email content here..." required>{% if result and result.email %}{{ result.email }}{% endif %}</textarea>
+
+<button class="btn analyze-btn text-white w-100 mt-3">
+🔍 Analyze Email Threat
+</button>
+</form>
+</div>
+
+
+{% if result %}
+{% set score = result.score|float %}
+
+<div class="glass-card mt-4 p-4">
+
+<h3>🔎 Analysis Result</h3>
+<hr>
+
+<div class="row align-items-center text-center">
+
+<div class="col-md-4">
+<h5>Prediction</h5>
+
+{% if result.prediction == "Phishing Email" %}
+<span class="badge bg-danger badge-risk">⚠ Phishing Email</span>
+{% elif result.prediction == "Suspicious Email" %}
+<span class="badge bg-warning text-dark badge-risk">⚠ Suspicious Email</span>
+{% else %}
+<span class="badge bg-success badge-risk">✅ Legitimate Email</span>
+{% endif %}
+</div>
+
+<div class="col-md-4">
+
+{% if score >= 75 %}
+<div class="score-circle" style="background:conic-gradient(#ef4444 {{ score }}%, #1e293b 0);">
+{% elif score >= 40 %}
+<div class="score-circle" style="background:conic-gradient(#f59e0b {{ score }}%, #1e293b 0);">
+{% else %}
+<div class="score-circle" style="background:conic-gradient(#22c55e {{ score }}%, #1e293b 0);">
+{% endif %}
+
+<div class="score-inner">
+<span class="score-value">{{ result.score }}%</span>
+<small>Threat Score</small>
+</div>
+</div>
+
+</div>
+
+<div class="col-md-4">
+<h5>Risk Level</h5>
+
+{% if result.risk == "High" %}
+<span class="badge bg-danger badge-risk">🔴 High Risk</span>
+{% elif result.risk == "Medium" %}
+<span class="badge bg-warning text-dark badge-risk">🟠 Medium Risk</span>
+{% else %}
+<span class="badge bg-success badge-risk">🟢 Low Risk</span>
+{% endif %}
+</div>
+
+</div>
+
+<div class="progress mt-4" style="height:25px;border-radius:20px;">
+<div class="progress-bar
+{% if score >= 75 %}
+bg-danger
+{% elif score >= 40 %}
+bg-warning
+{% else %}
+bg-success
+{% endif %}"
+style="width: {{ score }}%;">
+{{ result.score }}%
+</div>
+</div>
+
+</div>
+{% endif %}
+
+
+{% set indicators = result.indicators if result and result.indicators else {} %}
+{% set suspicious_links = indicators.get("suspicious_links", 0)|int %}
+{% set urgent_words = indicators.get("urgent_words", 0)|int %}
+{% set credential_words = indicators.get("credential_words", 0)|int %}
+{% set fake_sender = indicators.get("fake_sender", 0)|int %}
+
+<div class="glass-card mt-4 p-4">
+<h3>🛡 Email Security Indicators</h3>
+
+{% if result %}
+<div class="debug-box mt-3 mb-3">
+Indicator values:
+Suspicious Links = {{ suspicious_links }},
+Urgent Language = {{ urgent_words }},
+Credential Requests = {{ credential_words }},
+Fake Sender = {{ fake_sender }}
+</div>
+{% endif %}
+
+<div class="row g-3 mt-2">
+
+<div class="col-md-3">
+<div class="indicator {% if suspicious_links > 0 %}danger{% else %}safe{% endif %}">
+<h2>🔗</h2>
+<h6>Suspicious Links</h6>
+
+{% if suspicious_links > 0 %}
+<span class="badge bg-danger indicator-badge">Detected</span>
+<small class="d-block mt-2 text-secondary">
+{{ suspicious_links }} suspicious link issue found
+</small>
+{% else %}
+<span class="badge bg-success indicator-badge">Safe</span>
+<small class="d-block mt-2 text-secondary">
+No suspicious link
+</small>
+{% endif %}
+
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="indicator {% if urgent_words > 0 %}warning{% else %}safe{% endif %}">
+<h2>⚠</h2>
+<h6>Urgent Language</h6>
+
+{% if urgent_words > 0 %}
+<span class="badge bg-warning text-dark indicator-badge">Detected</span>
+<small class="d-block mt-2 text-secondary">
+{{ urgent_words }} urgent keyword found
+</small>
+{% else %}
+<span class="badge bg-success indicator-badge">Safe</span>
+<small class="d-block mt-2 text-secondary">
+No urgency detected
+</small>
+{% endif %}
+
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="indicator {% if credential_words > 0 %}danger{% else %}safe{% endif %}">
+<h2>🔑</h2>
+<h6>Credential Requests</h6>
+
+{% if credential_words > 0 %}
+<span class="badge bg-danger indicator-badge">Detected</span>
+<small class="d-block mt-2 text-secondary">
+{{ credential_words }} credential keyword found
+</small>
+{% else %}
+<span class="badge bg-success indicator-badge">Safe</span>
+<small class="d-block mt-2 text-secondary">
+No credential request
+</small>
+{% endif %}
+
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="indicator {% if fake_sender > 0 %}danger{% else %}safe{% endif %}">
+<h2>👤</h2>
+<h6>Fake Sender</h6>
+
+{% if fake_sender > 0 %}
+<span class="badge bg-danger indicator-badge">Detected</span>
+<small class="d-block mt-2 text-secondary">
+Sender looks suspicious
+</small>
+{% else %}
+<span class="badge bg-success indicator-badge">Safe</span>
+<small class="d-block mt-2 text-secondary">
+Sender looks normal
+</small>
+{% endif %}
+
+</div>
+</div>
+
+</div>
+</div>
+
+
+{% if result and result.reasons %}
+<div class="glass-card mt-4 p-4">
+<h3>📌 Detection Reasons</h3>
+
+<div class="reason-box mt-3">
+<ul>
+{% for reason in result.reasons %}
+<li>{{ reason }}</li>
+{% endfor %}
+</ul>
+</div>
+</div>
+{% endif %}
+
+
+{% if result and result.links and result.links|length > 0 %}
+<div class="glass-card mt-4 p-4">
+<h3>🔗 Links Found</h3>
+
+<div class="reason-box mt-3">
+<ul>
+{% for link in result.links %}
+<li>{{ link }}</li>
+{% endfor %}
+</ul>
+</div>
+</div>
+{% endif %}
+
+
+{% if result and result.keywords and result.keywords|length > 0 %}
+<div class="glass-card mt-4 p-4">
+<h3>⚠ Suspicious Keywords Found</h3>
+
+<div class="reason-box mt-3">
+{% for keyword in result.keywords %}
+<span class="badge bg-warning text-dark me-2 mb-2">{{ keyword }}</span>
+{% endfor %}
+</div>
+</div>
+{% endif %}
+
+
+<div class="row g-4 mt-4">
+
+<div class="col-md-3">
+<div class="feature-card">
+<h1>🔗</h1>
+<h5>Link Detection</h5>
+<p>Detects malicious URLs, short links and fake login domains.</p>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="feature-card">
+<h1>⚠</h1>
+<h5>Social Engineering</h5>
+<p>Identifies fear, urgency and pressure-based phishing language.</p>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="feature-card">
+<h1>🔐</h1>
+<h5>Credential Theft</h5>
+<p>Detects password, OTP, account and banking-related requests.</p>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="feature-card">
+<h1>🤖</h1>
+<h5>Machine Learning</h5>
+<p>Uses Hybrid XGBoost with TF-IDF text features and manual email security features.</p>
+</div>
+</div>
+
+</div>
+
+<div class="footer">
+<hr>
+<h5>🛡 AI-Powered Phishing Detection Site</h5>
+<p>Flask | SQLite | XGBoost | TF-IDF | Bootstrap</p>
+</div>
+
+</div>
+
+</body>
+</html>
