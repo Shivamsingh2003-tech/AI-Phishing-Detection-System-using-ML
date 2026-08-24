@@ -9,9 +9,9 @@ import io
 import hashlib
 import zipfile
 import secrets
-import smtplib
+import resend
 import time
-from email.message import EmailMessage
+
 from datetime import datetime
 
 from dotenv import load_dotenv
@@ -40,6 +40,7 @@ from db_operations import (
     get_admin_by_id,
     get_admin_by_username,
     update_admin_password,
+    reset_admin_password_db,
     delete_admin,
     count_admins,
     clear_login_history
@@ -3045,64 +3046,86 @@ def login():
 
 
 # ============================================================
-# PASSWORD RESET EMAIL
+# PASSWORD RESET EMAIL - RESEND
 # ============================================================
 
-def send_reset_otp(
-    otp
-):
+def send_reset_otp(otp):
 
     """
-    Send password-reset OTP to the configured reset email.
+    Send password-reset OTP using Resend HTTPS API.
+
+    This replaces Gmail SMTP because Render Free
+    blocks outbound SMTP ports 25, 465 and 587.
     """
 
-    if (
-        not MAIL_USERNAME
-        or not MAIL_PASSWORD
-    ):
+    resend_api_key = os.getenv(
+        "RESEND_API_KEY"
+    )
+
+    reset_email = os.getenv(
+        "RESET_EMAIL"
+    )
+
+    if not resend_api_key:
 
         raise RuntimeError(
-            "MAIL_USERNAME and MAIL_PASSWORD are not configured in .env"
+            "RESEND_API_KEY is not configured."
         )
 
-    message = EmailMessage()
+    if not reset_email:
 
-    message["Subject"] = (
-        "AI Phishing Detection - Admin Password Reset OTP"
-    )
-
-    message["From"] = MAIL_USERNAME
-
-    message["To"] = RESET_EMAIL
-
-    message.set_content(
-        f"""AI Phishing Detection System
-
-Your admin password reset OTP is: {otp}
-
-This OTP is valid for 5 minutes and can be used only once.
-
-If you did not request a password reset, ignore this email.
-
-Regards,
-AI Phishing Detection System
-"""
-    )
-
-    with smtplib.SMTP_SSL(
-        "smtp.gmail.com",
-        465,
-        timeout=20
-    ) as smtp:
-
-        smtp.login(
-            MAIL_USERNAME,
-            MAIL_PASSWORD
+        raise RuntimeError(
+            "RESET_EMAIL is not configured."
         )
 
-        smtp.send_message(
-            message
+    resend.api_key = resend_api_key
+
+    params = {
+
+        "from":
+            "AI Phishing Detection <onboarding@resend.dev>",
+
+        "to":
+            [reset_email],
+
+        "subject":
+            "AI Phishing Detection - Admin Password Reset OTP",
+
+        "text":
+            f"""AI Phishing Detection System
+
+            Your admin password reset OTP is: {otp}
+
+            This OTP is valid for 5 minutes and can be used only once.
+
+            If you did not request a password reset, ignore this email.
+
+            Regards,
+            AI Phishing Detection System
+            """
+    }
+
+    try:
+
+        email = resend.Emails.send(
+            params
         )
+
+        print(
+            "PASSWORD RESET OTP EMAIL SENT:",
+            email
+        )
+
+        return True
+
+    except Exception as exc:
+
+        print(
+            "RESEND EMAIL ERROR:",
+            exc
+        )
+
+        raise
 
 
 # ============================================================
