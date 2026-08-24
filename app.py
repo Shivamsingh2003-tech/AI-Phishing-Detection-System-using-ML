@@ -682,16 +682,31 @@ def get_file_hash(
 
 def valid_url(text):
 
-    pattern = re.compile(
-        r'^(https?://)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(/.*)?$'
-    )
+    try:
+        text = str(text).strip()
 
-    return bool(
-        pattern.match(
-            text.strip()
-        )
-    )
+        if not text:
+            return False
 
+        url = normalize_url(text)
+        parsed = urlparse(url)
+
+        if parsed.scheme not in ("http", "https"):
+            return False
+
+        if not parsed.netloc:
+            return False
+
+        if any(char.isspace() for char in url):
+            return False
+
+        if not parsed.hostname:
+            return False
+
+        return True
+
+    except Exception:
+        return False
 
 def normalize_url(url):
 
@@ -731,84 +746,82 @@ def whitelist_safe_domain(url):
 
 def phishing_rule_score(url):
 
-    u = normalize_url(
-        url
-    ).lower()
+    u = normalize_url(url).lower()
 
-    domain = get_domain(
-        u
-    )
+    try:
+        parsed = urlparse(u)
+        domain = (parsed.hostname or "").lower()
+        netloc = parsed.netloc.lower()
+        path = parsed.path.lower()
+    except Exception:
+        return 100
 
     score = 0
 
-    phishing_words = [
+    # Strong deceptive URL structure.
+    if "@" in netloc:
+        score += 50
 
-        "login",
-        "verify",
-        "verification",
-        "secure",
-        "security",
-        "account",
-        "update",
-        "confirm",
-        "password",
-        "signin",
-        "bank",
-        "paypal",
-        "facebook",
-        "linkedin",
-        "microsoft365",
-        "amazon",
-        "freehost",
-        "alert",
-        "check",
-        "support"
+    # IPv4 host instead of a normal domain.
+    if re.fullmatch(r"\d{1,3}(?:\.\d{1,3}){3}", domain):
+        score += 40
+
+    if parsed.scheme == "http":
+        score += 10
+
+    high_risk_words = [
+        "login", "signin", "sign-in", "verify", "verification",
+        "password", "credential", "account", "security", "secure",
+        "update", "confirm", "reset", "bank", "billing", "payment",
+        "wallet", "alert", "support"
     ]
 
-    for word in phishing_words:
-
-        if word in u:
-
-            score += 10
-
-    if domain.endswith(
-        SUSPICIOUS_TLDS
-    ):
-
-        score += 25
-
-    if u.startswith(
-        "http://"
-    ):
-
-        score += 10
-
-    if "-" in domain:
-
-        score += 10
-
-    if len(
-        domain.split(".")
-    ) > 3:
-
-        score += 10
-
-    if not domain_matches(
-        domain,
-        TRUSTED_DOMAINS
-    ):
-
-        for brand in BRAND_WORDS:
-
-            if brand in domain:
-
-                score += 25
-
-    return min(
-        score,
-        100
+    word_hits = sum(
+        1 for word in high_risk_words if word in u
     )
 
+    score += min(word_hits * 8, 40)
+
+    if domain.endswith(SUSPICIOUS_TLDS):
+        score += 30
+
+    domain_parts = domain.split(".")
+
+    if len(domain_parts) >= 4:
+        score += 15
+
+    if len(domain_parts) >= 5:
+        score += 15
+
+    if "-" in domain:
+        score += 10
+
+    if not domain_matches(domain, TRUSTED_DOMAINS):
+        for brand in BRAND_WORDS:
+            if brand in domain:
+                score += 35
+                break
+
+    suspicious_paths = [
+        "/login", "/signin", "/sign-in", "/verify",
+        "/verification", "/password", "/reset",
+        "/account", "/secure", "/security",
+        "/billing", "/payment"
+    ]
+
+    if any(suspicious_path in path for suspicious_path in suspicious_paths):
+        score += 15
+
+    if len(u) > 100:
+        score += 10
+
+    if len(u) > 180:
+        score += 10
+
+    if parsed.query:
+        score += 5
+
+    return min(score, 100)
 
 def make_url_input(
     features
@@ -1825,192 +1838,100 @@ def predict_text_phishing(
     text,
     category="email"
 ):
+    """
+    Predict phishing risk for email/content text.
 
-    text = str(
-        text or ""
-    ).strip()
+    IMPORTANT:
+    - The ML model score is treated as a signal, not as the final truth.
+    - A very high ML score with ZERO independent phishing indicators is
+      capped to avoid false HIGH results caused by model calibration.
+    - Strong corroborating indicators can still produce HIGH risk.
+    """
+
+    text = str(text or "").strip()
 
     # --------------------------------------------------------
     # EMPTY TEXT
     # --------------------------------------------------------
 
     if not text:
-
         prediction, risk = classify_text(
             0.0,
             category=category
         )
 
         return {
-
-            "prediction":
-                prediction,
-
-            "score":
-                0.0,
-
-            "risk":
-                risk,
-
+            "prediction": prediction,
+            "score": 0.0,
+            "risk": risk,
             "indicators": {
-
                 "suspicious_links": 0,
                 "urgent_words": 0,
                 "credential_words": 0,
                 "fake_sender": 0
             },
-
             "keywords": [],
             "links": [],
-
-            "reasons":
-                ["No text content found"],
-
-            "model_score":
-                0.0,
-
-            "rule_score":
-                0.0
+            "reasons": ["No text content found"],
+            "model_score": 0.0,
+            "rule_score": 0.0
         }
 
     # --------------------------------------------------------
     # SOURCE CODE
     # --------------------------------------------------------
 
-    if is_source_code_content(
-        text
-    ):
-
+    if is_source_code_content(text):
         prediction, risk = classify_text(
             5.0,
             category=category
         )
 
         return {
-
-            "prediction":
-                prediction,
-
-            "score":
-                5.0,
-
-            "risk":
-                risk,
-
+            "prediction": prediction,
+            "score": 5.0,
+            "risk": risk,
             "indicators": {
-
                 "suspicious_links": 0,
                 "urgent_words": 0,
                 "credential_words": 0,
                 "fake_sender": 0
             },
-
             "keywords": [],
             "links": [],
-
-            "reasons":
-                [
-                    "Programming/source code content detected, not phishing message content"
-                ],
-
-            "model_score":
-                5.0,
-
-            "rule_score":
-                5.0
+            "reasons": [
+                "Programming/source code content detected, not phishing message content"
+            ],
+            "model_score": 5.0,
+            "rule_score": 5.0
         }
 
     # --------------------------------------------------------
-    # BENIGN SECURITY NOTICE
+    # BASIC ANALYSIS
     # --------------------------------------------------------
 
-    if is_benign_security_notice(
-        text
-    ):
-
-        prediction, risk = classify_text(
-            15.0,
-            category=category
-        )
-
-        return {
-
-            "prediction":
-                prediction,
-
-            "score":
-                15.0,
-
-            "risk":
-                risk,
-
-            "indicators": {
-
-                "suspicious_links": 0,
-                "urgent_words": 0,
-                "credential_words": 0,
-                "fake_sender": 0
-            },
-
-            "keywords": [],
-
-            "links":
-                extract_links(text),
-
-            "reasons":
-                [
-                    "Benign security notification detected with no phishing link or credential request"
-                ],
-
-            "model_score":
-                15.0,
-
-            "rule_score":
-                15.0
-        }
-
-    # --------------------------------------------------------
-    # MODEL CHECK
-    # --------------------------------------------------------
-
-    if email_model is None:
-
-        raise Exception(
-            "Email/Text model not loaded"
-        )
-
-    sender = extract_sender_email(
-        text
-    )
-
+    sender = extract_sender_email(text)
     sender_domain = (
         sender.split("@")[-1].lower()
         if sender
         else ""
     )
 
-    sender_is_trusted = bool(
-        sender
-    ) and (
-        sender.lower()
-        in TRUSTED_SENDERS
+    sender_is_trusted = bool(sender) and (
+        sender.lower() in TRUSTED_SENDERS
         or domain_matches(
             sender_domain,
             TRUSTED_DOMAINS
         )
     )
 
-    links = extract_links(
-        text
-    )
+    links = extract_links(text)
 
+    # Determine whether any link is outside the trusted list.
     has_untrusted_link = False
 
     for link in links:
-
-        clean_link = clean_url_text(
-            link
-        )
+        clean_link = clean_url_text(link)
 
         link_domain = urlparse(
             clean_link
@@ -2023,82 +1944,54 @@ def predict_text_phishing(
                 TRUSTED_DOMAINS
             )
         ):
-
             has_untrusted_link = True
-
             break
 
     # --------------------------------------------------------
     # TRUSTED SENDER
     # --------------------------------------------------------
 
-    if (
-        sender_is_trusted
-        and not has_untrusted_link
-    ):
-
+    if sender_is_trusted and not has_untrusted_link:
         prediction, risk = classify_text(
             5.0,
             category=category
         )
 
         return {
-
-            "prediction":
-                prediction,
-
-            "score":
-                5.0,
-
-            "risk":
-                risk,
-
+            "prediction": prediction,
+            "score": 5.0,
+            "risk": risk,
             "indicators": {
-
                 "suspicious_links": 0,
                 "urgent_words": 0,
                 "credential_words": 0,
                 "fake_sender": 0
             },
-
             "keywords": [],
-
-            "links":
-                links,
-
-            "reasons":
-                [
-                    "Trusted sender/domain and no suspicious external link found"
-                ],
-
-            "model_score":
-                5.0,
-
-            "rule_score":
-                5.0
+            "links": links,
+            "reasons": [
+                "Trusted sender/domain and no suspicious external link found"
+            ],
+            "model_score": 5.0,
+            "rule_score": 5.0
         }
 
     # --------------------------------------------------------
-    # FEATURES
+    # FEATURES / INDICATORS
     # --------------------------------------------------------
 
-    feature_dict = email_features_to_dict(
-        text
-    )
+    feature_dict = email_features_to_dict(text)
 
     indicators = calculate_email_indicators(
         text,
         feature_dict
     )
 
-    keywords = extract_suspicious_keywords(
-        text
-    )
-
+    keywords = extract_suspicious_keywords(text)
     text_lower = text.lower()
 
+    # Strong credential-theft phrases.
     strong_credential_words = [
-
         "verify your password",
         "verify password",
         "password",
@@ -2111,12 +2004,17 @@ def predict_text_phishing(
         "update your password",
         "reset password",
         "click the link",
-        "click below"
+        "click below",
+        "enter your otp",
+        "enter otp"
     ]
 
-    unofficial_brand_sender = (
+    # --------------------------------------------------------
+    # BRAND IMPERSONATION
+    # --------------------------------------------------------
 
-        sender
+    unofficial_brand_sender = (
+        bool(sender)
         and not sender_is_trusted
         and (
             any(
@@ -2130,10 +2028,6 @@ def predict_text_phishing(
         )
     )
 
-    # --------------------------------------------------------
-    # STRONG BRAND IMPERSONATION
-    # --------------------------------------------------------
-
     if (
         unofficial_brand_sender
         and (
@@ -2144,48 +2038,34 @@ def predict_text_phishing(
             )
         )
     ):
-
         prediction, risk = classify_text(
             90.0,
             category=category
         )
 
         return {
-
-            "prediction":
-                prediction,
-
-            "score":
-                90.0,
-
-            "risk":
-                risk,
-
-            "indicators":
-                indicators,
-
-            "keywords":
-                keywords,
-
-            "links":
-                links,
-
-            "reasons":
-                [
-                    "Unofficial brand sender detected",
-                    "Strong phishing signal found"
-                ],
-
-            "model_score":
-                90.0,
-
-            "rule_score":
-                90.0
+            "prediction": prediction,
+            "score": 90.0,
+            "risk": risk,
+            "indicators": indicators,
+            "keywords": keywords,
+            "links": links,
+            "reasons": [
+                "Unofficial brand sender detected",
+                "Strong phishing signal found"
+            ],
+            "model_score": 90.0,
+            "rule_score": 90.0
         }
 
     # --------------------------------------------------------
     # ML MODEL INPUT
     # --------------------------------------------------------
+
+    if email_model is None:
+        raise Exception(
+            "Email/Text model not loaded"
+        )
 
     model_features = (
         email_features
@@ -2203,17 +2083,13 @@ def predict_text_phishing(
     )
 
     if email_model_mode == "hybrid_text_numeric":
-
         input_data = numeric_df.copy()
-
         input_data.insert(
             0,
             "email_text",
             text
         )
-
     else:
-
         input_data = numeric_df
 
     # --------------------------------------------------------
@@ -2233,12 +2109,9 @@ def predict_text_phishing(
     # RULE SCORE
     # --------------------------------------------------------
 
-    rule_score = email_rule_score(
-        text
-    )
+    rule_score = email_rule_score(text)
 
     if indicators["fake_sender"] == 1:
-
         rule_score = max(
             rule_score,
             80
@@ -2251,65 +2124,195 @@ def predict_text_phishing(
             or indicators["credential_words"] > 0
         )
     ):
-
         rule_score = max(
             rule_score,
             85
         )
 
     # --------------------------------------------------------
-    # FINAL SCORE
+    # FINAL SCORE / CALIBRATION GUARDRAIL
+    # --------------------------------------------------------
+    #
+    # The old code used:
+    #
+    #     max(ml_score, rule_score)
+    #
+    # That means a badly calibrated ML probability such as 99.52%
+    # automatically became HIGH even when every security indicator
+    # was zero.
+    #
+    # The new logic requires corroborating evidence before allowing
+    # a very high ML score to become HIGH.
     # --------------------------------------------------------
 
-    score = round(
-        max(
-            ml_score,
-            rule_score
-        ),
-        2
+    suspicious_links = int(
+        indicators.get("suspicious_links", 0)
     )
+
+    urgent_words = int(
+        indicators.get("urgent_words", 0)
+    )
+
+    credential_words = int(
+        indicators.get("credential_words", 0)
+    )
+
+    fake_sender = int(
+        indicators.get("fake_sender", 0)
+    )
+
+    indicator_count = (
+        suspicious_links
+        + urgent_words
+        + credential_words
+        + fake_sender
+    )
+
+    keyword_count = len(keywords)
+    link_count = len(links)
+
+    strong_signal = (
+        fake_sender > 0
+        or credential_words >= 2
+        or (
+            suspicious_links > 0
+            and (
+                urgent_words > 0
+                or credential_words > 0
+            )
+        )
+        or (
+            keyword_count >= 3
+            and (
+                urgent_words > 0
+                or credential_words > 0
+            )
+        )
+    )
+
+    moderate_signal = (
+        indicator_count > 0
+        or keyword_count > 0
+        or link_count > 0
+        or rule_score >= 20
+    )
+
+    if strong_signal:
+        # Strong independent evidence: allow the ML model to contribute.
+        score = round(
+            max(
+                rule_score,
+                (0.70 * ml_score) + (0.30 * rule_score)
+            ),
+            2
+        )
+
+        # Strong phishing indicators should be able to reach HIGH.
+        if rule_score >= 80:
+            score = max(
+                score,
+                rule_score
+            )
+
+    elif moderate_signal:
+        # Some suspicious evidence exists, but not enough to blindly
+        # trust an extreme ML probability.
+        score = round(
+            max(
+                rule_score,
+                min(
+                    69.0,
+                    (0.55 * ml_score) + (0.45 * rule_score)
+                )
+            ),
+            2
+        )
+
+    else:
+        # No links, no urgency, no credential request, no fake sender,
+        # and no suspicious keywords.
+        #
+        # This prevents a poorly calibrated text model from turning
+        # ordinary messages into HIGH risk.
+        score = round(
+            min(
+                25.0,
+                max(
+                    5.0,
+                    (0.20 * ml_score) + (0.80 * rule_score)
+                )
+            ),
+            2
+        )
+
+    # --------------------------------------------------------
+    # FINAL CLASSIFICATION
+    # --------------------------------------------------------
 
     prediction, risk = classify_text(
         score,
         category=category
     )
 
-    reasons = build_reasons(
-        indicators,
-        keywords,
-        links,
-        ml_score,
-        rule_score
-    )
+    reasons = []
+
+    if strong_signal:
+        if ml_score >= email_threshold * 100:
+            reasons.append(
+                "AI text model detected phishing-like language"
+            )
+
+    if rule_score >= 40:
+        reasons.append(
+            "Rule-based phishing indicators detected"
+        )
+
+    if suspicious_links > 0:
+        reasons.append(
+            "Suspicious link pattern found"
+        )
+
+    if urgent_words > 0:
+        reasons.append(
+            "Urgency words found"
+        )
+
+    if credential_words > 0:
+        reasons.append(
+            "Credential-related words found"
+        )
+
+    if fake_sender > 0:
+        reasons.append(
+            "Possible fake sender indicator found"
+        )
+
+    if keywords:
+        reasons.append(
+            "Suspicious keywords: "
+            + ", ".join(keywords[:8])
+        )
+
+    if links:
+        reasons.append(
+            f"Total links detected: {len(links)}"
+        )
+
+    if not reasons:
+        reasons.append(
+            "No strong phishing indicators detected"
+        )
 
     return {
-
-        "prediction":
-            prediction,
-
-        "score":
-            score,
-
-        "risk":
-            risk,
-
-        "indicators":
-            indicators,
-
-        "keywords":
-            keywords,
-
-        "links":
-            links,
-
-        "reasons":
-            reasons,
-
-        "model_score":
-            ml_score,
-
-        "rule_score":
-            rule_score
+        "prediction": prediction,
+        "score": score,
+        "risk": risk,
+        "indicators": indicators,
+        "keywords": keywords,
+        "links": links,
+        "reasons": reasons,
+        "model_score": ml_score,
+        "rule_score": rule_score
     }
 
 
@@ -4074,6 +4077,7 @@ def home():
                     url
                 )
 
+                # Combine ML and deterministic URL rules.
                 score = round(
                     max(
                         ml_score,
@@ -4081,6 +4085,14 @@ def home():
                     ),
                     2
                 )
+
+                # Strong deterministic URL indicators should produce
+                # High Risk even when the ML model is conservative.
+                if rule_score >= 75:
+                    score = max(
+                        score,
+                        85.0
+                    )
 
                 prediction, risk = classify_url(
                     score
